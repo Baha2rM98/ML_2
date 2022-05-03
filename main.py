@@ -25,10 +25,10 @@ def feature_selector():
     X = dataset['data']
     y = dataset['labels']
     feature_scores = pd.concat(
-        [pd.DataFrame(X.columns), pd.DataFrame(SelectKBest(score_func=chi2, k=25).fit(X, y).scores_)],
+        [pd.DataFrame(X.columns), pd.DataFrame(SelectKBest(score_func=chi2, k=50).fit(X, y).scores_)],
         axis=1)
     feature_scores.columns = ['Features', 'Score']
-    best_features = X[feature_scores.nlargest(25, 'Score')['Features'].values]
+    best_features = X[feature_scores.nlargest(50, 'Score')['Features'].values]
     global X_train, X_test, y_train, y_test
     X_train, X_test, y_train, y_test = train_test_split(best_features.values, y.values.reshape(801, ), test_size=0.2,
                                                         random_state=42)
@@ -39,23 +39,25 @@ def feature_selector():
     return
 
 
-# def feature_extractor():
-#     dataset = read_dataset()
-#     X = dataset['data'].values
-#     y = dataset['labels'].values.reshape(801, )
-#     lda = LDA()
-#     lda.fit(X, y)
-#     return lda.transform(X).shape
+def feature_extractor():
+    dataset = read_dataset()
+    X = dataset['data'].values
+    y = dataset['labels'].values.reshape(801, )
+    lda = LDA()
+    lda.fit(X, y)
+    return lda.transform(X).shape
 
 
 def normalizer():
-    return {'scaled_X_train': MinMaxScaler().fit_transform(X_train, y_train),
-            'scaled_X_test': MinMaxScaler().fit_transform(X_test, y_test)}
+    global X_train, X_test
+    X_train = MinMaxScaler().fit_transform(X_train, y_train)
+    X_test = MinMaxScaler().fit_transform(X_test, y_test)
+    return
 
 
 def fit_train_predict():
     print('Logistic Regression')
-    lr = LogisticRegression(solver='saga')
+    lr = LogisticRegression(solver='saga', random_state=42, multi_class='multinomial')
     lr.fit(X_train, y_train)
     y_pred_test = lr.predict(X_test)
     print('Test confusion matrix:')
@@ -112,7 +114,5 @@ def fit_train_predict():
 if __name__ == '__main__':
     # print(feature_extractor())
     feature_selector()
-    scaled_features = normalizer()
-    X_train = scaled_features['scaled_X_train']
-    X_test = scaled_features['scaled_X_test']
+    normalizer()
     fit_train_predict()
