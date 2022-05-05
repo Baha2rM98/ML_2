@@ -27,8 +27,8 @@ def feature_selector():
     feature_scores = pd.concat(
         [pd.DataFrame(X.columns), pd.DataFrame(SelectKBest(score_func=chi2, k=50).fit(X, y).scores_)],
         axis=1)
-    feature_scores.columns = ['Features', 'Score']
-    best_features = X[feature_scores.nlargest(50, 'Score')['Features'].values]
+    feature_scores.columns = ['Feature', 'Score']
+    best_features = X[feature_scores.nlargest(50, 'Score')['Feature'].values]
     global X_train, X_test, y_train, y_test
     X_train, X_test, y_train, y_test = train_test_split(best_features.values, y.values.reshape(801, ), test_size=0.2,
                                                         random_state=42)
@@ -57,7 +57,7 @@ def normalizer():
 
 def fit_train_predict():
     print('Logistic Regression')
-    lr = LogisticRegression(solver='saga', random_state=42, multi_class='multinomial')
+    lr = LogisticRegression(solver='saga', random_state=42, multi_class='multinomial', max_iter=500)
     lr.fit(X_train, y_train)
     y_pred_test = lr.predict(X_test)
     print('Test confusion matrix:')
