@@ -59,7 +59,7 @@ def data_preprocessing_with_feature_extraction():
     normalizer()
     y_train = y_train.values.reshape(640, )
     y_test = y_test.values.reshape(161, )
-    lda = LinearDiscriminantAnalysis(n_components=4)
+    lda = LinearDiscriminantAnalysis()
     X_train = lda.fit_transform(X_train, y_train)
     X_test = lda.transform(X_test)
     return
